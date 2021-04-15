@@ -39,11 +39,11 @@ jobs:
         cmake --build . --config Release
         
     - name: Test
-      workingDirectory: build/test/
+      working-directory: build/test/
       run: xlnt.text
       
     - name: Sample
-      workingDirectory: build/samples
+      working-directory: build/samples
       run: |
         sample-decrypt
         sample-img2xlsx data/penguin.jpg img.xlsx
@@ -51,7 +51,7 @@ jobs:
 
 # FIXME: Coverage for Windows        
 #    - name: Coverage
-#      workingDirectory: build
+#      working-directory: build
 #      run: |
 #        lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
 #        lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
