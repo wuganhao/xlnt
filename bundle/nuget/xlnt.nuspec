@@ -10,6 +10,7 @@
     <description>XLNT</description>
     <releaseNotes>XLNT</releaseNotes>
     <tags>XLNT, Office, Excel</tags>
+    <repository type="git" url="$repository$" branch="$branch$" commit="$commit$" />
     <dependencies>
       <group targetFramework="native0.0">
       </group>

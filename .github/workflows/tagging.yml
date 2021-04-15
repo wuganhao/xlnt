@@ -2,6 +2,8 @@ name: Push Build
 
 on:
   push:
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -28,33 +30,44 @@ jobs:
 
     - name: Build
       run: |
-        mkdir compile
-        cd compile
-        cmake .. -DwxUSE_STL=OFF -DwxUSE_GUI=1 -DwxBUILD_PRECOMP=1 -DwxBUILD_MONOLITHIC=ON -DwxBUILD_VENDOR= -DwxBUILD_CXX_STANDARD=17
+        mkdir build
+        cd build
+        cmake .. -D XLNT_CXX_LANG=17 -D STATIC=OFF -D BENCHMARKS=ON -D SAMPLES=ON -D COVERAGE=ON
         cmake --build . --config Debug
         cmake --build . --config Release
 
+    - name: Test
+      working-directory: build/tests/Debug
+      run: xlnt.test.exe
+
+    - name: Sample
+      working-directory: build/samples
+      run: |
+        sample-decrypt.exe
+        sample-img2xlsx.exe data/penguin.jpg img.xlsx
+        sample-documentation.exe
+
+# FIXME: Coverage for Windows
+#    - name: Coverage
+#      working-directory: build
+#      run: |
+#        lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
+#        lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
+#        i=$(dirname $(pwd))
+#        sed -i "s|$i/||" coverage.info
+#        cd ..
+#        coveralls-lcov build/coverage.info
+
     - name: extract tag name
-      if: startswith(github.ref, 'refs/tags/')
       uses: olegtarasov/get-tag@v2.1
       id: tagname
       with:
         tagregex: "([0-9\\.]+.*)"
         tagregexgroup: 1
 
-    - name: Build Nuget Package - Prerelease
-      if: "!startswith(github.ref, 'refs/tags/')"
-      run: nuget pack bundle\nuget\wxWidgets.nuspec -OutputFileNamesWithoutVersion -properties version=1.0.0-prerelease -OutputDirectory dist\ -properties repository=${{github.repository}} -BasePath .
+    - name: Build Nuget Package
+      run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=${{env.git_tag_name}} -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -properties commit=${{ github.sha }} -properties branch=${{ github.ref }} GITHUB_SHA -BasePath .
 
-    - name: Upload Artifacts
-      if: "!startswith(github.ref, 'refs/tags/')"
-      uses: actions/upload-artifact@v2
-      with:
-        name: nuget
-        path: dist/*.nupkg
 
-    - name: Build and Push Nuget Package - Release
-      if: startswith(github.ref, 'refs/tags/')
-      run: |
-        nuget pack bundle\nuget\wxWidgets.nuspec -OutputFileNamesWithoutVersion -properties version=${{env.git_tag_name}} -OutputDirectory dist\ -properties repository=${{github.repository}} -BasePath .
-        nuget push dist\*.nupkg -NoSymbols -source https://api.nuget.org/v3/index.json -apikey ${{ secrets.nuget_apikey }}
+    - name: Nuget Package
+      run: nuget push dist\*.nupkg -NoSymbols -source https://api.nuget.org/v3/index.json -apikey ${{ secrets.nuget_apikey }}

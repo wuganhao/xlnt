@@ -61,7 +61,7 @@ jobs:
 #        coveralls-lcov build/coverage.info
 
     - name: Build Nuget Package
-      run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=1.0.0-prerelease -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -BasePath .
+      run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=1.0.0-prerelease -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -properties commit=${{ github.sha }} -properties branch=${{ github.ref }} -BasePath .
 
     - name: Upload Artifacts
       if: "!startswith(github.ref, 'refs/tags/')"
