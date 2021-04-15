@@ -36,16 +36,16 @@ jobs:
         cmake --build . --config Debug
         cmake --build . --config Release
 
-    - name: Test
-      working-directory: build/tests/Debug
-      run: xlnt.test.exe
-
-    - name: Sample
-      working-directory: build/samples
-      run: |
-        sample-decrypt.exe
-        sample-img2xlsx.exe data/penguin.jpg img.xlsx
-        sample-documentation.exe
+#    - name: Test
+#      working-directory: build/tests/Debug
+#      run: xlnt.test.exe
+#
+#    - name: Sample
+#      working-directory: build/samples
+#      run: |
+#        sample-decrypt.exe
+#        sample-img2xlsx.exe data/penguin.jpg img.xlsx
+#        sample-documentation.exe
 
 # FIXME: Coverage for Windows
 #    - name: Coverage
