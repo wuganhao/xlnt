@@ -40,14 +40,14 @@ jobs:
         
     - name: Test
       working-directory: build/tests/Debug
-      run: xlnt.test
+      run: xlnt.test.exe
       
-#    - name: Sample
-#      working-directory: build/samples
-#      run: |
-#        sample-decrypt
-#        sample-img2xlsx data/penguin.jpg img.xlsx
-#        sample-documentation
+    - name: Sample
+      working-directory: build/samples
+      run: |
+        sample-decrypt.exe
+        sample-img2xlsx.exe data/penguin.jpg img.xlsx
+        sample-documentation.exe
 
 # FIXME: Coverage for Windows        
 #    - name: Coverage

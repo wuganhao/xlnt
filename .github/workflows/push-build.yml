@@ -18,38 +18,38 @@ jobs:
         fetch-depth: 1
         submodules: recursive
         clean: true
-    
+
     - uses: nuget/setup-nuget@v1
       with:
         nuget-api-key: ${{ secrets.nuget_apikey }}
         nuget-version: '5.x'
-    
+
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64
         toolset: 16.0
-    
+
     - name: Build
       run: |
-        mkdir build 
+        mkdir build
         cd build
         cmake .. -D XLNT_CXX_LANG=17 -D STATIC=OFF -D BENCHMARKS=ON -D SAMPLES=ON -D COVERAGE=ON
         cmake --build . --config Debug
         cmake --build . --config Release
-        
+
     - name: Test
       working-directory: build/tests/Debug
-      run: xlnt.test
-      
-#    - name: Sample
-#      working-directory: build/samples
-#      run: |
-#        sample-decrypt
-#        sample-img2xlsx data/penguin.jpg img.xlsx
-#        sample-documentation
+      run: xlnt.test.exe
 
-# FIXME: Coverage for Windows        
+    - name: Sample
+      working-directory: build/samples
+      run: |
+        sample-decrypt.exe
+        sample-img2xlsx.exe data/penguin.jpg img.xlsx
+        sample-documentation.exe
+
+# FIXME: Coverage for Windows
 #    - name: Coverage
 #      working-directory: build
 #      run: |
@@ -59,15 +59,13 @@ jobs:
 #        sed -i "s|$i/||" coverage.info
 #        cd ..
 #        coveralls-lcov build/coverage.info
-       
-      
+
     - name: Build Nuget Package
       run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=1.0.0-prerelease -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -BasePath .
-    
+
     - name: Upload Artifacts
       if: "!startswith(github.ref, 'refs/tags/')"
       uses: actions/upload-artifact@v2
       with:
         name: nuget
         path: dist/*.nupkg
-        
