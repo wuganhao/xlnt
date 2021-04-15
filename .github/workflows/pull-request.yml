@@ -34,7 +34,7 @@ jobs:
       run: |
         mkdir build 
         cd build
-        cmake -D XLNT_CXX_LANG=17 -D STATIC=OFF -D BENCHMARKS=ON -D SAMPLES=ON -D COVERAGE=ON
+        cmake .. -D XLNT_CXX_LANG=17 -D STATIC=OFF -D BENCHMARKS=ON -D SAMPLES=ON -D COVERAGE=ON
         cmake --build . --config Debug
         cmake --build . --config Release
         
