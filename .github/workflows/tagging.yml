@@ -66,7 +66,7 @@ jobs:
         tagregexgroup: 1
 
     - name: Build Nuget Package
-      run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=${{env.git_tag_name}} -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -properties commit=${{ github.sha }} -properties branch=${{ github.ref }} GITHUB_SHA -BasePath .
+      run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=${{env.git_tag_name}} -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -properties commit=${{ github.sha }} -properties branch=${{ github.ref }} -BasePath .
 
 
     - name: Nuget Package
