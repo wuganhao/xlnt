@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2020 Thomas Fussell
+// Copyright (c) 2014-2021 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -14,7 +14,7 @@
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, WRISING FROM,
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE
 //
@@ -182,7 +182,10 @@ void xlsx_producer::begin_part(const path &part)
     end_part();
     current_part_streambuf_ = archive_->open(part);
     current_part_stream_.rdbuf(current_part_streambuf_.get());
-    current_part_serializer_.reset(new xml::serializer(current_part_stream_, part.string()));
+
+    auto xml_serializer = new xml::serializer(current_part_stream_, part.string(), 0);
+    xml_serializer->xml_decl("1.0", "UTF-8", "yes");
+    current_part_serializer_.reset(xml_serializer);
 }
 
 // Package Parts
@@ -672,6 +675,16 @@ void xlsx_producer::write_workbook(const relationship &rel)
         if (child_rel.type() == relationship_type::calculation_chain) continue;
 
         path archive_path(child_rel.source().path().parent().append(child_rel.target().path()));
+        
+        // write binary
+        switch (child_rel.type())
+        {
+        case relationship_type::vbaproject:
+            write_binary(archive_path);
+            continue;
+        }
+
+        // write xml
         begin_part(archive_path);
 
         switch (child_rel.type())
@@ -765,6 +778,8 @@ void xlsx_producer::write_workbook(const relationship &rel)
         case relationship_type::single_cell_table_definitions:
             break;
         case relationship_type::table_definition:
+            break;
+        case relationship_type::vbaproject:
             break;
         case relationship_type::image:
             break;
@@ -2767,6 +2782,22 @@ void xlsx_producer::write_worksheet(const relationship &rel)
         write_end_element(xmlns, "hyperlinks");
     }
 
+    if (ws.has_phonetic_properties())
+    {
+        write_start_element(xmlns, phonetic_pr::Serialised_ID());
+        const auto &ph_props = ws.phonetic_properties();
+        write_attribute("fontId", ph_props.font_id());
+        if (ph_props.has_type())
+        {
+            write_attribute("type", phonetic_pr::type_as_string(ph_props.type()));
+        }
+        if (ph_props.has_alignment())
+        {
+            write_attribute("alignment", phonetic_pr::alignment_as_string(ph_props.alignment()));
+        }
+        write_end_element(xmlns, phonetic_pr::Serialised_ID());
+    }
+
     if (ws.d_->print_options_.is_set())
     {
         auto &opts = ws.d_->print_options_.get();
@@ -2794,22 +2825,6 @@ void xlsx_producer::write_worksheet(const relationship &rel)
         write_end_element(xmlns, "printOptions");
     }
 
-    if (ws.has_phonetic_properties())
-    {
-        write_start_element(xmlns, phonetic_pr::Serialised_ID());
-        const auto &ph_props = ws.phonetic_properties();
-        write_attribute("fontId", ph_props.font_id());
-        if (ph_props.has_type())
-        {
-            write_attribute("type", phonetic_pr::type_as_string(ph_props.type()));
-        }
-        if (ph_props.has_alignment())
-        {
-            write_attribute("alignment", phonetic_pr::alignment_as_string(ph_props.alignment()));
-        }
-        write_end_element(xmlns, phonetic_pr::Serialised_ID());
-    }
-
     if (ws.has_page_margins())
     {
         write_start_element(xmlns, "pageMargins");
@@ -2826,6 +2841,7 @@ void xlsx_producer::write_worksheet(const relationship &rel)
 
     if (ws.has_page_setup())
     {
+        const xlnt::page_setup &ps = ws.page_setup();
         write_start_element(xmlns, "pageSetup");
         if (ws.page_setup().orientation_.is_set())
         {
@@ -2839,8 +2855,22 @@ void xlsx_producer::write_worksheet(const relationship &rel)
         {
             write_attribute("verticalDpi", ws.page_setup().vertical_dpi_.get());
         }
-        /*write_attribute("paperSize", static_cast<std::size_t>(ws.page_setup().paper_size()));
-        write_attribute("fitToHeight", write_bool(ws.page_setup().fit_to_height()));
+        
+        if (ps.has_paper_size())
+        {
+            write_attribute("paperSize", static_cast<std::size_t>(ps.paper_size()));
+        }
+
+        if (ps.has_scale())
+        {
+            write_attribute("scale", ps.scale());
+        }
+
+        if (ps.has_rel_id())
+        {
+            write_attribute(xml::qname(xmlns_r, "id"), ps.rel_id());
+        }
+        /*write_attribute("fitToHeight", write_bool(ws.page_setup().fit_to_height()));
         write_attribute("fitToWidth", write_bool(ws.page_setup().fit_to_width()));*/
         write_end_element(xmlns, "pageSetup");
     }
@@ -3033,19 +3063,26 @@ void xlsx_producer::write_worksheet(const relationship &rel)
             archive_path = std::accumulate(split_part_path.begin(), split_part_path.end(), path(""),
                 [](const path &a, const std::string &b) { return a.append(b); });
 
-            begin_part(archive_path);
+            if (child_rel.type() == relationship_type::printer_settings)
+            {
+                write_binary(archive_path);
+            }
+            else
+            {
+                begin_part(archive_path);
 
-            if (child_rel.type() == relationship_type::comments)
-            {
-                write_comments(child_rel, ws, cells_with_comments);
-            }
-            else if (child_rel.type() == relationship_type::vml_drawing)
-            {
-                write_vml_drawings(child_rel, ws, cells_with_comments);
-            }
-            else if (child_rel.type() == relationship_type::drawings)
-            {
-                write_drawings(child_rel, ws);
+                if (child_rel.type() == relationship_type::comments)
+                {
+                    write_comments(child_rel, ws, cells_with_comments);
+                }
+                else if (child_rel.type() == relationship_type::vml_drawing)
+                {
+                    write_vml_drawings(child_rel, ws, cells_with_comments);
+                }
+                else if (child_rel.type() == relationship_type::drawings)
+                {
+                    write_drawings(child_rel, ws);
+                }
             }
         }
     }
@@ -3300,6 +3337,15 @@ void xlsx_producer::write_image(const path &image_path)
 
     vector_istreambuf buffer(source_.d_->images_.at(image_path.string()));
     auto image_streambuf = archive_->open(image_path);
+    std::ostream(image_streambuf.get()) << &buffer;
+}
+
+void xlsx_producer::write_binary(const path &binary_path)
+{
+    end_part();
+
+    vector_istreambuf buffer(source_.d_->binaries_.at(binary_path.string()));
+    auto image_streambuf = archive_->open(binary_path);
     std::ostream(image_streambuf.get()) << &buffer;
 }
 
