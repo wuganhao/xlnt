@@ -1,0 +1,71 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+      - release/*
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout with submodules
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        submodules: recursive
+        clean: true
+
+    - uses: nuget/setup-nuget@v1
+      with:
+        nuget-api-key: ${{ secrets.nuget_apikey }}
+        nuget-version: '5.x'
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+        toolset: 16.0
+
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake .. -D XLNT_CXX_LANG=17 -D STATIC=OFF -D BENCHMARKS=ON -D SAMPLES=ON -D COVERAGE=ON
+        cmake --build . --config Debug
+        cmake --build . --config Release
+
+#    - name: Test
+#      working-directory: build/tests/Debug
+#      run: xlnt.test.exe
+#
+#    - name: Sample
+#      working-directory: build/samples
+#      run: |
+#        sample-decrypt.exe
+#        sample-img2xlsx.exe data/penguin.jpg img.xlsx
+#        sample-documentation.exe
+
+# FIXME: Coverage for Windows
+#    - name: Coverage
+#      working-directory: build
+#      run: |
+#        lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
+#        lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
+#        i=$(dirname $(pwd))
+#        sed -i "s|$i/||" coverage.info
+#        cd ..
+#        coveralls-lcov build/coverage.info
+
+    - name: Build Nuget Package
+      run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=1.0.0-prerelease -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -properties commit=${{ github.sha }} -properties branch=${{ github.ref }} -BasePath .
+
+    - name: Upload Artifacts
+      if: "!startswith(github.ref, 'refs/tags/')"
+      uses: actions/upload-artifact@v2
+      with:
+        name: nuget
+        path: dist/*.nupkg
