@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        static: [OFF]
 
     steps:
     - name: Checkout with submodules
@@ -28,35 +31,33 @@ jobs:
         arch: amd64
         toolset: 16.0
 
-    - name: Build
+    - name: CMake
       run: |
         mkdir build
         cd build
-        cmake .. -D XLNT_CXX_LANG=17 -D STATIC=OFF -D BENCHMARKS=ON -D SAMPLES=ON -D COVERAGE=ON
+        cmake -G "Visual Studio 16 2019" -D XLNT_CXX_LANG=17 -D STATIC=${{ matrix.static }} -D BENCHMARKS=ON -D SAMPLES=ON -D BENCHMARKS=ON ..
+
+    - name: Build
+      working-directory: build
+      run: |
         cmake --build . --config Debug
         cmake --build . --config Release
 
-#    - name: Test
-#      working-directory: build/tests/Debug
-#      run: xlnt.test.exe
-#
-#    - name: Sample
-#      working-directory: build/samples
-#      run: |
-#        sample-decrypt.exe
-#        sample-img2xlsx.exe data/penguin.jpg img.xlsx
-#        sample-documentation.exe
+    - name: Test
+      working-directory: build
+      run: |
+        tests\Debug\xlnt.test.exe
+        samples\Debug\sample-documentation.exe
 
-# FIXME: Coverage for Windows
-#    - name: Coverage
-#      working-directory: build
-#      run: |
-#        lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
-#        lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
-#        i=$(dirname $(pwd))
-#        sed -i "s|$i/||" coverage.info
-#        cd ..
-#        coveralls-lcov build/coverage.info
+    #- name: Coverage
+    #  working-directory: build
+    #  run: |
+    #    lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
+    #    lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
+    #    i=$(dirname $(pwd))
+    #    sed -i "s|$i/||" coverage.info
+    #    cd ..
+    #    coveralls-lcov build/coverage.info
 
     - name: extract tag name
       uses: olegtarasov/get-tag@v2.1
