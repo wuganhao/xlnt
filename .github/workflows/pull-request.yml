@@ -49,7 +49,7 @@ jobs:
       working-directory: build
       run: |
         tests\Debug\xlnt.test.exe
-        samples\%configuration%\sample-documentation.exe
+        samples\Debug\sample-documentation.exe
 
     - name: Coverage
       working-directory: build
