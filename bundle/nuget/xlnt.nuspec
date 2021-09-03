@@ -11,6 +11,7 @@
     <releaseNotes>XLNT</releaseNotes>
     <tags>XLNT, Office, Excel</tags>
     <readme>docs\README.md</readme>
+    <icon>docs\xlnt.png</icon>
     <repository type="git" url="$repository$" branch="$branch$" commit="$commit$" />
     <dependencies>
       <group targetFramework="native0.0">
@@ -26,5 +27,6 @@
     <file src=".\build\source\Debug\*.lib"        target="lib\native\x64\Debug\" />
     <file src=".\build\source\Debug\*.pdb"        target="lib\native\x64\Debug\" />
     <file src=".\README.md"                       target="docs\README.md" />
+    <file src=".\logo\logo.png"                   target="docs\xlnt.png" />
   </files>
 </package>
