@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>xlnt is a modern C++ library for manipulating spreadsheets in memory and reading/writing them from/to XLSX files</title>
+    <authors>Wu Ganhao&lt;wuganhao@hotmail.com&gt;</authors>
+    <owners>Wu Ganhao&lt;wuganhao@hotmail.com&gt;</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>XLNT</description>
+    <releaseNotes>XLNT</releaseNotes>
+    <tags>XLNT, Office, Excel</tags>
+    <readme>docs\README.md</readme>
+    <repository type="git" url="$repository$" branch="$branch$" commit="$commit$" />
+    <dependencies>
+      <group targetFramework="native0.0">
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src=".\bundle\nuget\xlnt.targets"          target="build\$id$.targets" />
+    <file src=".\include\**\*.*"                  target="include\" />
+    <file src=".\build\source\Release\*.dll"      target="lib\native\x64\Release\" />
+    <file src=".\build\source\Release\*.lib"      target="lib\native\x64\Release\" />
+    <file src=".\build\source\Debug\*.dll"        target="lib\native\x64\Debug\" />
+    <file src=".\build\source\Debug\*.lib"        target="lib\native\x64\Debug\" />
+    <file src=".\build\source\Debug\*.pdb"        target="lib\native\x64\Debug\" />
+    <file src=".\README.md"                       target="docs\README.md" />
+  </files>
+</package>
