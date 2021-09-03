@@ -35,7 +35,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -G "Visual Studio 16 2019" -D XLNT_CXX_LANG=17 -D STATIC=${{ static.node }} -D BENCHMARKS=ON -D SAMPLES=ON -D BENCHMARKS=ON ..
+        cmake -G "Visual Studio 16 2019" -D XLNT_CXX_LANG=17 -D STATIC=${{ matrix.static }} -D BENCHMARKS=ON -D SAMPLES=ON -D BENCHMARKS=ON ..
 
     - name: Build
       working-directory: build
