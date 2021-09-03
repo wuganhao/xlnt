@@ -31,7 +31,7 @@ jobs:
         arch: amd64
         toolset: 16.0
 
-    - name: Build
+    - name: CMake
       run: |
         mkdir build
         cd build
