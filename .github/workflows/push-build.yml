@@ -51,15 +51,15 @@ jobs:
         tests\Debug\xlnt.test.exe
         samples\Debug\sample-documentation.exe
 
-    - name: Coverage
-      working-directory: build
-      run: |
-        lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
-        lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
-        i=$(dirname $(pwd))
-        sed -i "s|$i/||" coverage.info
-        cd ..
-        coveralls-lcov build/coverage.info
+    #- name: Coverage
+    #  working-directory: build
+    #  run: |
+    #    lcov --directory source/CMakeFiles/xlnt.dir --capture --output-file coverage.info --base-directory ../source --no-external --gcov-tool /usr/bin/gcov-6
+    #    lcov --output-file coverage.info --remove coverage.info source/detail/serialization/miniz.cpp
+    #    i=$(dirname $(pwd))
+    #    sed -i "s|$i/||" coverage.info
+    #    cd ..
+    #    coveralls-lcov build/coverage.info
 
     - name: Build Nuget Package
       run: nuget pack bundle\nuget\xlnt.nuspec -OutputFileNamesWithoutVersion -properties version=1.0.0-prerelease -properties id=wuganhao.xlnt -OutputDirectory dist\ -properties repository=${{github.repository}} -properties commit=${{ github.sha }} -properties branch=${{ github.ref }} -BasePath .

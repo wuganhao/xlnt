@@ -51,13 +51,6 @@ jobs:
         tests\Debug\xlnt.test.exe
         samples\Debug\sample-documentation.exe
 
-
-    - name: Coverage
-      uses: imciner2/run-lcov@v1
-      with:
-        input_directory: source/CMakeFiles/xlnt.dir
-        output_file: build/coverage.info
-
     #- name: Coverage
     #  working-directory: build
     #  run: |
