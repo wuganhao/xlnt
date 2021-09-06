@@ -2,6 +2,12 @@
 
 ## Binaries
 
+### NuGet
+
+xlnt nuget package is availabe from [nuget.org](https://www.nuget.org/packages/xlnt/1.5.3-rc1)
+
+This package currently only includes (Windows x64 Debug/Release build)
+
 ## Homebrew
 
 ## Arch

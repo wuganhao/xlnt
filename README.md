@@ -1,4 +1,4 @@
-<img height="100" src="https://user-images.githubusercontent.com/1735211/29433390-f37fa28e-836c-11e7-8a60-f8df4c30b424.png" alt="xlnt logo"><br/>
+![Logo](https://user-images.githubusercontent.com/1735211/29433390-f37fa28e-836c-11e7-8a60-f8df4c30b424.png)
 ====
 
 [![Travis Build Status](https://travis-ci.org/tfussell/xlnt.svg?branch=master)](https://travis-ci.org/tfussell/xlnt)
